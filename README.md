@@ -1,36 +1,59 @@
-# DC-001 — Network Interface Failure
+# Project Titan: Data Center Operations Lab — Lab 01 Server Break/Fix
 
-## Scenario
-`titan-ubuntu` lost external network connectivity.
+## Overview
+This lab documents four controlled break/fix incidents performed in an Ubuntu Linux virtualized environment. The goal was to practice a repeatable data-center troubleshooting workflow: establish a baseline, verify the incident, isolate the fault domain, remediate the issue, validate recovery, and document the outcome.
 
-## Baseline
-- Primary interface `enp0s3` was UP with IPv4 `10.0.2.15/24`.
-- Default route used gateway `10.0.2.2`.
-- Gateway, external IP, and DNS tests succeeded.
+> **Lab type:** Home lab / simulated production incidents  
+> **Platform:** Ubuntu Linux on Oracle VirtualBox  
+> **Technologies:** Linux networking, Docker, Nginx, ext4, loop devices, process monitoring, TCP/IP, DNS  
+> **Methodology:** Baseline → Verify → Investigate → Isolate → Diagnose → Remediate → Validate → Document
 
-## Failure
-The primary interface was intentionally placed in a DOWN state to simulate loss of network connectivity.
+## Incidents
 
-## Investigation
-1. Verified external connectivity failed with `Network is unreachable`.
-2. Checked `ip route` and observed the default route and `10.0.2.0/24` route were missing.
-3. Checked `ip addr` and found `enp0s3` in `state DOWN`.
+### DC-001 — Network Interface Failure
+Simulated loss of external connectivity by taking the primary network interface offline. Investigated interface state and routing, restored the interface, and validated gateway, internet, and DNS connectivity.
 
-## Root Cause
-The primary network interface `enp0s3` was administratively down. This removed the interface's active IPv4 configuration and associated default route. No physical NIC failure was established.
+[View DC-001](./DC-001-Network-Interface-Failure/README.md)
 
-## Remediation
-```bash
-sudo ip link set enp0s3 up
+### DC-002 — Docker / Nginx Service Failure
+Simulated a web-service outage while the Linux host remained network-accessible. Distinguished host-network health from application health, identified a stopped Nginx container, restored it, and validated HTTP service on TCP/8080.
+
+[View DC-002](./DC-002-Docker-Nginx-Service-Failure/README.md)
+
+### DC-003 — Storage Capacity Incident
+Built a safe 1 GB ext4 test filesystem, simulated storage pressure to 89% utilization, identified the space-consuming file, removed verified test data, and validated recovery to 1% utilization.
+
+[View DC-003](./DC-003-Storage-Capacity-Incident/README.md)
+
+### DC-004 — CPU Resource Incident
+Created a controlled runaway CPU process, identified the offending PID with `top`, terminated it gracefully, and validated return to approximately 99% CPU idle.
+
+[View DC-004](./DC-004-CPU-Resource-Incident/README.md)
+
+## Skills Demonstrated
+- Linux network interface and routing troubleshooting
+- Gateway, external IP, and DNS validation
+- Docker container lifecycle troubleshooting
+- Nginx/HTTP service validation with `curl`
+- Filesystem capacity analysis with `df` and `du`
+- ext4 filesystem creation and loop-device mounting
+- Linux process and CPU analysis with `top`
+- PID-based process remediation with `kill`
+- Incident documentation and validation discipline
+- Layered troubleshooting across network, application, storage, and compute resources
+
+## Important Note
+All faults in this project were intentionally created in a controlled home-lab environment. The project demonstrates troubleshooting methodology and technical practice; it does not represent production data-center employment experience.
+
+## Repository Structure
+```text
+Project-Titan-Data-Center-Operations-Lab-01/
+├── README.md
+├── COMMANDS.md
+├── INTERVIEW-TALKING-POINTS.md
+├── RESUME-BULLETS.md
+├── DC-001-Network-Interface-Failure/
+├── DC-002-Docker-Nginx-Service-Failure/
+├── DC-003-Storage-Capacity-Incident/
+└── DC-004-CPU-Resource-Incident/
 ```
-
-## Validation
-- `enp0s3` returned to `UP,LOWER_UP`.
-- IPv4 `10.0.2.15/24` returned.
-- Default route through `10.0.2.2` returned.
-- Gateway ping: 0% packet loss.
-- External IP ping: 0% packet loss.
-- DNS/hostname ping: 0% packet loss.
-
-## Evidence
-See the [`evidence`](./evidence/) folder for all 15 screenshots.
